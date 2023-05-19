@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.js"></script>
+    <link rel="stylesheet" href="../lib/bootstrap.css">
+</head>
+<body>
+    <div id="app">
+        <div>
+            <!-- 
+                在bootstrap框架里面把它的表单拿过来，给我用
+                @submit 表示为表单绑定一个“提交”事件
+                .prevent事件修饰符。用来阻止submit事件的默认行为
+                addStudent是一个submit事件处理函数
+             -->
+             <form class="form-inline" @submit.prevent="addStudent">
+                <div class="form-group">
+                  <label >品牌</label>
+                  <input type="text" class="form-control"  placeholder="请输入品牌名称" v-model="BrandName">
+                </div>
+     
+                <button type="submit" class="btn btn-primary">添加</button>
+              </form>
+        </div>
+        <table class="table table-hover table-striped">
+            <tr>
+                <td>编号</td>
+                <td>品牌</td>
+                <td>状态</td>
+                <td>创建时间</td>
+                <td>编辑</td>
+            </tr>
+            <!-- 将data数据源的学生列表渲染到表格中 -->
+            <tr v-for="Brand in stuList" :key="Brand.BrandNo">
+                <td>{{Brand.BrandNo}}</td>
+                <td>{{Brand.BrandName}}</td>
+                <td>
+                    <!-- 
+                        为复选框定义一个v-model双向绑定指令，跟stu对象的“是否吸烟”属性进行绑定
+                     -->
+                    <input type="checkbox" v-model="Brand.BrandState">
+                    {{Brand.BrandState ? '已启用' : '已禁用'}}
+                </td>
+                <td>{{Brand.BrandTime}}</td>
+                <!-- 
+                    根据学生学号删除学生信息
+                    @click表示为a标签绑定单击事件
+                    .prevent 阻止默认行为(不跳转)
+                    参数stu.stuNo表示学生的学号，根据学生学号删除学生信息
+                 -->
+                <td><a href="#" @click.prevent="removeStudentByStuNo(Brand.BrandNo)">删除</a></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        const vm = new Vue({
+            el: "#app",
+            data: {
+                /***
+                 *  定义学生数组，将它渲染到视图
+                 * 是否吸烟： true 吸烟  false 不吸烟 
+                 * 入学时间：当前系统时间
+                 **/
+                stuList: [
+                    {BrandNo: 101, BrandName: '宝马', BrandState: false, BrandTime: new Date("1975-10-13 11:13:00")},
+                    {BrandNo: 104, BrandName: '奔驰', BrandState: true, BrandTime: new Date("1975-10-13 11:13:00")},
+                    {BrandNo: 105, BrandName: '比亚迪', BrandState: false, BrandTime: new Date("1975-10-13 11:13:00")},
+                ],
+                // 双向绑定的学生姓名
+                BrandName: '',
+                // 下一个可用的学号 
+                nextStuNo: 106
+            },
+            methods:{
+                /**
+                 * 表单submit事件对应的处理函数。添加学生信息
+                 * 步骤：
+                 * 1 采集学生对象信息
+                 * 2 将学生对象添加到学生数组末尾
+                 * 3 清空表单
+                 * */
+                addStudent(){
+                    console.log(this.BrandName);
+                    // 修复：没有输入就提交的bug
+                    // 在添加之前检查学生姓名是否为空，如果为空就阻止提交
+                    if (this.BrandName ==='') {
+                        alert("品牌名称不能为空");
+                        return;
+                    }
+                    // 采集要添加的学生信息
+                    let studentInfo = {
+                        BrandNo: this.nextStuNo++,
+                        BrandName: this.BrandName,
+                        BrandState: false,
+                        BrandTime: new Date("1975-10-13 11:13:00")
+                    }
+                    // 将添加的学生信息放到数组末尾
+                    this.stuList.push(studentInfo);
+                    // 清空表单
+                    this.BrandName = '';
+
+                },
+                /**
+                 * 删除对应的事件处理函数，根据学生编号删除学生信息
+                 * 步骤：
+                 * 1. 输出学生的学号
+                 * 2. 调用stuList数组的filter函数，根据条件对指定的数据进行过滤
+                 * filter函数会逐个遍历每个学生信息，然后判断学生的学号是否跟参数一致，
+                 * 如果学号和参数不一致，将该学生对象提取到一个新的数组中
+                 * 如果学号和参数一致，将该学生对象过滤(不提取)
+                 * 
+                */
+                gettime(){
+                    var data;
+                    var y = date.getFullYear()+"-";
+                    var m = date.getMonth()+1+"-";
+                    var d = date.getDate();
+                    var h = date.getHours()+1+":";
+                    var mm = date.getMinutes()+1+":";
+                    var s = date.getSeconds()+1;
+                    data = y+m+d+h+mm+s;
+                    return data;
+
+                },
+                removeStudentByStuNo(BrandNo) {
+                    console.log(BrandNo)
+                    /**
+                     * filter会遍历每一个学生对象，判断当前学生的id是否等于参数的ID
+                     * 如果不等于，将学生对象提取到新数组(this.stuList)
+                     * 
+                    */
+                    this.stuList = this.stuList.filter(Brand=>{
+                        console.log(Brand.BrandNo+"-------"+BrandNo);
+                        if (Brand.BrandNo != BrandNo) {
+                            return Brand;
+                        }
+                    })
+                    
+                }
+            }
+        });
+    </script>
+</body>
+</html>
